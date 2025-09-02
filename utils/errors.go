@@ -19,5 +19,6 @@ const (
 )
 
 const (
+	ErrLoanNotFound        ErrorConst = "loan not found"
 	ErrInstallmentNotFound ErrorConst = "installment not found"
 )

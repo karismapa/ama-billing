@@ -13,10 +13,20 @@ var ()
 
 type ILoanInmem interface {
 	CreateLoan(ctx context.Context, loan model.Loan) (generatedLoan *model.Loan, err error)
-	GetLoan(ctx context.Context, loanID int64) (loan model.Loan, err error)
+	GetLoan(ctx context.Context, loanID int64) (loan *model.Loan, err error)
 	GetInstallments(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus, endDueTimeUnix *int64) (installments []*model.LoanInstallment, err error)
 	GetOldestInstallment(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus) (oldestInstallment *model.LoanInstallment, err error)
 	UpdateInstallmentStatus(ctx context.Context, installmentID int64, status model.LoanInstallmentStatus) (err error)
+}
+
+func NewLoanInmem() ILoanInmem {
+	return &LoanInmem{
+		loanTable:            make([]*model.Loan, 0),
+		loanMap:              make(map[int64]*model.Loan),
+		loanInstallmentTable: make([]*model.LoanInstallment, 0),
+		loanInstallmentMap:   make(map[int64]*model.LoanInstallment),
+		mu:                   sync.Mutex{},
+	}
 }
 
 type LoanInmem struct {
@@ -72,6 +82,14 @@ func (m *LoanInmem) CreateLoan(ctx context.Context, loan model.Loan) (generatedL
 	m.mu.Unlock()
 
 	generatedLoan.Installments = generatedLoanInstallments
+	return
+}
+
+func (m *LoanInmem) GetLoan(ctx context.Context, loanID int64) (loan *model.Loan, err error) {
+	loan, ok := m.loanMap[loanID]
+	if !ok {
+		return nil, utils.ErrLoanNotFound
+	}
 	return
 }
 

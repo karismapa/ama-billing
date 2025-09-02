@@ -17,5 +17,7 @@ type LoanUsecase struct {
 }
 
 func NewLoanUsecase() ILoanUsecase {
-	return &LoanUsecase{}
+	return &LoanUsecase{
+		loanInmem: inmem.NewLoanInmem(),
+	}
 }
