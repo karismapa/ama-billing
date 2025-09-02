@@ -13,16 +13,6 @@ type Loan struct {
 	Installments []*LoanInstallment
 }
 
-type LoanStatus int32
-
-const (
-	LoanStatusInitial LoanStatus = iota // for drafting, move to active after approved
-	LoanStatusActive
-	LoanStatusOverdue
-	LoanStatusPaidOff
-	LoanStatusClosed
-)
-
 type LoanInstallment struct {
 	ID             int64
 	LoanID         int64
@@ -33,11 +23,3 @@ type LoanInstallment struct {
 	UpdateTimeUnix int64
 	Status         LoanInstallmentStatus
 }
-
-type LoanInstallmentStatus int32
-
-const (
-	LoanInstallmentStatusInitial LoanInstallmentStatus = iota // for drafting, move to pending after approved
-	LoanInstallmentStatusPending
-	LoanInstallmentStatusPaid
-)
