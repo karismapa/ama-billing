@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/karismapa/ama-billing/model"
+	"github.com/karismapa/ama-billing/utils"
 )
 
 var ()
@@ -14,11 +15,15 @@ type ILoanInmem interface {
 	CreateLoan(ctx context.Context, loan model.Loan) (generatedLoan *model.Loan, err error)
 	GetLoan(ctx context.Context, loanID int64) (loan model.Loan, err error)
 	GetInstallments(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus, endDueTimeUnix *int64) (installments []*model.LoanInstallment, err error)
+	GetOldestInstallment(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus) (oldestInstallment *model.LoanInstallment, err error)
+	UpdateInstallmentStatus(ctx context.Context, installmentID int64, status model.LoanInstallmentStatus) (err error)
 }
 
 type LoanInmem struct {
 	loanTable            []*model.Loan
+	loanMap              map[int64]*model.Loan
 	loanInstallmentTable []*model.LoanInstallment
+	loanInstallmentMap   map[int64]*model.LoanInstallment
 
 	mu sync.Mutex
 }
@@ -40,6 +45,7 @@ func (m *LoanInmem) CreateLoan(ctx context.Context, loan model.Loan) (generatedL
 	generatedLoan.CreateTimeUnix = actionTime.Unix()
 	generatedLoan.UpdateTimeUnix = actionTime.Unix()
 	m.loanTable = append(m.loanTable, generatedLoan)
+	m.loanMap[generatedLoan.ID] = generatedLoan
 	m.mu.Unlock()
 
 	generatedLoanInstallments := []*model.LoanInstallment{}
@@ -61,6 +67,7 @@ func (m *LoanInmem) CreateLoan(ctx context.Context, loan model.Loan) (generatedL
 		generatedLoanInstallment.CreateTimeUnix = actionTime.Unix()
 		generatedLoanInstallment.UpdateTimeUnix = actionTime.Unix()
 		m.loanInstallmentTable = append(m.loanInstallmentTable, generatedLoanInstallment)
+		m.loanInstallmentMap[generatedLoanInstallment.ID] = generatedLoanInstallment
 	}
 	m.mu.Unlock()
 
@@ -84,5 +91,36 @@ func (m *LoanInmem) GetInstallments(ctx context.Context, loanID int64, status *m
 		}
 		installments = append(installments, installment)
 	}
+	return
+}
+
+func (m *LoanInmem) GetOldestInstallment(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus) (oldestInstallment *model.LoanInstallment, err error) {
+	installments, err := m.GetInstallments(ctx, loanID, status, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(installments) == 0 {
+		return nil, utils.ErrInstallmentNotFound
+	}
+	for _, selection := range installments {
+		if selection == nil {
+			continue
+		}
+		if oldestInstallment == nil || oldestInstallment.DueTimeUnix > selection.DueTimeUnix {
+			oldestInstallment = selection
+		}
+	}
+	return
+}
+
+func (m *LoanInmem) UpdateInstallmentStatus(ctx context.Context, installmentID int64, status model.LoanInstallmentStatus) (err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	installment, ok := m.loanInstallmentMap[installmentID]
+	if !ok {
+		return utils.ErrInstallmentNotFound
+	}
+	installment.Status = status
 	return
 }

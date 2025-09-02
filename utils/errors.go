@@ -14,4 +14,10 @@ const (
 	ErrRateValueTooBig          ErrorConst = "rate value too big"
 	ErrNumOfInstallmentTooSmall ErrorConst = "num of installment too small"
 	ErrNumOfInstallmentTooBig   ErrorConst = "num of installment too big"
+
+	ErrInstallmentStatusInvalid ErrorConst = "installment status invalid"
+)
+
+const (
+	ErrInstallmentNotFound ErrorConst = "installment not found"
 )
