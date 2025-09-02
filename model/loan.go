@@ -7,7 +7,18 @@ type Loan struct {
 	Rate           int32 // in percentage *100
 	CreateTimeUnix int64
 	UpdateTimeUnix int64
+	Status         LoanStatus
 }
+
+type LoanStatus int32
+
+const (
+	LoanStatusInitial LoanStatus = iota // for drafting, move to active after approved
+	LoanStatusActive
+	LoanStatusOverdue
+	LoanStatusPaidOff
+	LoanStatusClosed
+)
 
 type LoanInstallment struct {
 	ID             int64
@@ -23,6 +34,7 @@ type LoanInstallment struct {
 type LoanInstallmentStatus int32
 
 const (
-	LoanInstallmentStatusInitial LoanInstallmentStatus = iota
+	LoanInstallmentStatusInitial LoanInstallmentStatus = iota // for drafting, move to pending after approved
+	LoanInstallmentStatusPending
 	LoanInstallmentStatusPaid
 )
