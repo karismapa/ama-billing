@@ -14,7 +14,23 @@ const (
 	ErrRateValueTooBig          ErrorConst = "rate value too big"
 	ErrNumOfInstallmentTooSmall ErrorConst = "num of installment too small"
 	ErrNumOfInstallmentTooBig   ErrorConst = "num of installment too big"
+)
 
+var createValidationMap = map[string]bool{
+	ErrInvalidUserID.Error():            true,
+	ErrPrincipalValueTooSmall.Error():   true,
+	ErrPrincipalValueTooBig.Error():     true,
+	ErrRateValueTooSmall.Error():        true,
+	ErrRateValueTooBig.Error():          true,
+	ErrNumOfInstallmentTooSmall.Error(): true,
+	ErrNumOfInstallmentTooBig.Error():   true,
+}
+
+func IsErrValidation(err error) bool {
+	return createValidationMap[err.Error()]
+}
+
+const (
 	ErrInstallmentStatusInvalid ErrorConst = "installment status invalid"
 )
 

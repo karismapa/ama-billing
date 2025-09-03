@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/karismapa/ama-billing/model"
+	"github.com/karismapa/ama-billing/utils"
 )
 
 func (s *LoanHTTPServer) createLoan(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +41,10 @@ func (s *LoanHTTPServer) createLoan(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("error: CreateLoan failed, err: %v", err)
+		if utils.IsErrValidation(err) {
+			http.Error(w, fmt.Sprintf("invalid parameter: %s", err), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, "error on creating new loan", http.StatusInternalServerError)
 		return
 	}
