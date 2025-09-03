@@ -6,10 +6,10 @@ This is a Billing System that means to do several things:
 2. Outstanding Amount for a given loan
 3. Status of whether the customer is Delinquent or not
 
-With above capabilities, this service are meant to at least have these capabilities:
-● GetOutstanding: This returns the current outstanding on a loan, 0 if no outstanding (or closed)
-● IsDelinquent: If there are more than 2 weeks of Non payment of the loan amount
-● MakePayment: Make a payment of certain amount on the loan
+With above capabilities, this service are meant to at least have these capabilities/goals:
+1. GetOutstanding: This returns the current outstanding on a loan, 0 if no outstanding (or closed)
+2. IsDelinquent: If there are more than 2 weeks of Non payment of the loan amount
+3. MakePayment: Make a payment of certain amount on the loan
 
 ## Assumptions
 To simplify the process, some assumptions that is applied to the System was:
@@ -35,15 +35,19 @@ curl --location 'localhost:8080/loan' \
     "num_of_installment": 10
 }'
 ```
-- Get Loan detail (Goal 1)
+- Get Loan detail
 ```
 curl --location 'localhost:8080/loan/1'
 ```
-- Get outstanding installments (Goal 2)
+- Get outstanding installments
 ```
 curl --location 'localhost:8080/loan/1/outstandings'
 ```
-- Pay an installment
+- Get outstanding recap (Goal 1 and 2)
+```
+curl --location 'localhost:8080/loan/1/outstanding_recap'
+```
+- Pay an installment (Goal 3)
 ```
 curl --location --request POST 'localhost:8080/loan/1/pay'
 ```
