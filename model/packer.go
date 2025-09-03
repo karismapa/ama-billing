@@ -49,6 +49,11 @@ func PackInstallmentsDisplay(installments []*LoanInstallment) (installmentsDispl
 	return
 }
 
+func PackOutstandingRecap(in OutstandingRecap) OutstandingRecap {
+	in.TotalOutstandingValueStr = formatRupiahWithDecimals(in.TotalOutstandingValue)
+	return in
+}
+
 func formatRupiahWithDecimals(amountInCents int64) string {
 	// split into rupiah and cents
 	rupiah := amountInCents / 100

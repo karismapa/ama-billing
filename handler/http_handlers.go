@@ -100,6 +100,29 @@ func (s *LoanHTTPServer) getOutstandingInstallments(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(model.PackInstallmentsDisplay(outstandings))
 }
 
+func (s *LoanHTTPServer) getOutstandingRecap(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	loanIDStr := vars["id"]
+
+	loanID, err := strconv.ParseInt(loanIDStr, 10, 64)
+	if err != nil {
+		log.Printf("error: ParseInt failed, err: %v", err)
+		http.Error(w, "invalid loan ID", http.StatusBadRequest)
+		return
+	}
+
+	outstandingRecap, err := s.loanUsecase.GetOutstandingRecap(r.Context(), loanID)
+	if err != nil {
+		log.Printf("error: GetLoan failed, err: %v", err)
+		http.Error(w, "error on getting loan info", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.PackOutstandingRecap(outstandingRecap))
+}
+
 func (s *LoanHTTPServer) payInstallment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	loanIDStr := vars["id"]

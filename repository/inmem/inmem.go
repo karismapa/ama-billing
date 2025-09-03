@@ -15,6 +15,7 @@ type ILoanInmem interface {
 	CreateLoan(ctx context.Context, loan model.Loan) (generatedLoan *model.Loan, err error)
 	GetLoan(ctx context.Context, loanID int64) (loan *model.Loan, err error)
 	GetInstallments(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus, endDueTimeUnix *int64) (installments []*model.LoanInstallment, err error)
+	GetTotalOutstanding(ctx context.Context, loanID int64, endDueTimeUnix *int64) (totalOutstandingValue int64, installmentCount int32, err error)
 	GetOldestInstallment(ctx context.Context, loanID int64, status *model.LoanInstallmentStatus) (oldestInstallment *model.LoanInstallment, err error)
 	UpdateInstallmentStatus(ctx context.Context, installmentID int64, status model.LoanInstallmentStatus) (err error)
 }
@@ -108,6 +109,27 @@ func (m *LoanInmem) GetInstallments(ctx context.Context, loanID int64, status *m
 			continue
 		}
 		installments = append(installments, installment)
+	}
+	return
+}
+
+func (m *LoanInmem) GetTotalOutstanding(ctx context.Context, loanID int64, endDueTimeUnix *int64) (totalOutstandingValue int64, installmentCount int32, err error) {
+	for _, installment := range m.loanInstallmentTable {
+		if installment == nil {
+			continue
+		}
+		if installment.LoanID != loanID {
+			continue
+		}
+		if installment.Status != model.LoanInstallmentStatusPending {
+			continue
+		}
+		if endDueTimeUnix != nil && installment.DueTimeUnix > *endDueTimeUnix {
+			continue
+		}
+		totalOutstandingValue += installment.PrincipalValue
+		totalOutstandingValue += installment.InterestValue
+		installmentCount++
 	}
 	return
 }

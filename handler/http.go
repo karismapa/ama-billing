@@ -29,8 +29,9 @@ func (s *LoanHTTPServer) registerRoutes() {
 	s.router = mux.NewRouter()
 
 	s.router.HandleFunc("/loan", s.createLoan).Methods("POST")
-	s.router.HandleFunc("/loan/{id}", s.getLoanDetail).Methods("GET")                           // IsDelinquent
+	s.router.HandleFunc("/loan/{id}", s.getLoanDetail).Methods("GET")
 	s.router.HandleFunc("/loan/{id}/outstandings", s.getOutstandingInstallments).Methods("GET") // GetOutstanding
+	s.router.HandleFunc("/loan/{id}/outstanding_recap", s.getOutstandingRecap).Methods("GET")   // GetTotalOutstanding and IsDelinquent
 	s.router.HandleFunc("/loan/{id}/pay", s.payInstallment).Methods("POST")                     // MakePayment
 }
 

@@ -8,4 +8,6 @@ const (
 	MaxRateValue        = 10000       // 100.00% in percentage *100
 	MinNumOfInstallment = 1           // in week
 	MaxNumOfInstallment = 104         // in week
+
+	MaxInstallmentForDelinquent = 2
 )

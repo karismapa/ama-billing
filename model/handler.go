@@ -27,3 +27,10 @@ type LoanInstallmentDisplay struct {
 	UpdateTimeUnix    int64                 `json:"update_time_unix"`
 	Status            LoanInstallmentStatus `json:"status"`
 }
+
+type OutstandingRecap struct {
+	TotalOutstandingValue    int64                    `json:"total_outstanding_value"`
+	TotalOutstandingValueStr string                   `json:"total_outstanding_value_str"`
+	IsDelinquent             bool                     `json:"is_delinquent"`
+	Installments             []LoanInstallmentDisplay `json:"outstandings,omitempty"`
+}
