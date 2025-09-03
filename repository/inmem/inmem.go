@@ -140,5 +140,6 @@ func (m *LoanInmem) UpdateInstallmentStatus(ctx context.Context, installmentID i
 		return utils.ErrInstallmentNotFound
 	}
 	installment.Status = status
+	installment.UpdateTimeUnix = time.Now().Unix()
 	return
 }
