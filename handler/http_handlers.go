@@ -5,7 +5,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/karismapa/ama-billing/model"
 )
 
@@ -13,7 +15,8 @@ func (s *LoanHTTPServer) createLoan(w http.ResponseWriter, r *http.Request) {
 	// read the body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		log.Printf("error: ReadAll failed, err: %v", err)
+		http.Error(w, "error reading request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -22,7 +25,7 @@ func (s *LoanHTTPServer) createLoan(w http.ResponseWriter, r *http.Request) {
 	var payload model.LoanDisplay
 	if err := json.Unmarshal(body, &payload); err != nil {
 		log.Printf("error: Unmarshal failed, err: %v", err)
-		http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "error parsing JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -46,7 +49,26 @@ func (s *LoanHTTPServer) createLoan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *LoanHTTPServer) getLoanDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	loanIDStr := vars["id"]
 
+	loanID, err := strconv.ParseInt(loanIDStr, 10, 64)
+	if err != nil {
+		log.Printf("error: ParseInt failed, err: %v", err)
+		http.Error(w, "invalid loan ID", http.StatusBadRequest)
+		return
+	}
+
+	loan, err := s.loanUsecase.GetLoan(r.Context(), loanID)
+	if err != nil {
+		log.Printf("error: GetLoan failed, err: %v", err)
+		http.Error(w, "error on getting loan info", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.PackLoanDisplay(loan))
 }
 
 func (s *LoanHTTPServer) getOutstandingInstallments(w http.ResponseWriter, r *http.Request) {
