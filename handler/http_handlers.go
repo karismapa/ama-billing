@@ -95,5 +95,22 @@ func (s *LoanHTTPServer) getOutstandingInstallments(w http.ResponseWriter, r *ht
 }
 
 func (s *LoanHTTPServer) payInstallment(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	loanIDStr := vars["id"]
 
+	loanID, err := strconv.ParseInt(loanIDStr, 10, 64)
+	if err != nil {
+		log.Printf("error: ParseInt failed, err: %v", err)
+		http.Error(w, "invalid loan ID", http.StatusBadRequest)
+		return
+	}
+
+	err = s.loanUsecase.PayInstallment(r.Context(), loanID)
+	if err != nil {
+		log.Printf("error: PayInstallment failed, err: %v", err)
+		http.Error(w, "error on pay process", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
