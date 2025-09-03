@@ -72,7 +72,26 @@ func (s *LoanHTTPServer) getLoanDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *LoanHTTPServer) getOutstandingInstallments(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	loanIDStr := vars["id"]
 
+	loanID, err := strconv.ParseInt(loanIDStr, 10, 64)
+	if err != nil {
+		log.Printf("error: ParseInt failed, err: %v", err)
+		http.Error(w, "invalid loan ID", http.StatusBadRequest)
+		return
+	}
+
+	outstandings, err := s.loanUsecase.GetOutstandingInstallments(r.Context(), loanID)
+	if err != nil {
+		log.Printf("error: GetLoan failed, err: %v", err)
+		http.Error(w, "error on getting loan info", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.PackInstallmentsDisplay(outstandings))
 }
 
 func (s *LoanHTTPServer) payInstallment(w http.ResponseWriter, r *http.Request) {

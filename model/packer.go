@@ -22,21 +22,29 @@ func PackLoanDisplay(loan *Loan) (loanDisplay LoanDisplay) {
 		NumOfInstallment:  loan.NumOfInstallment,
 	}
 	if len(loan.Installments) > 0 {
-		loanDisplay.Installments = make([]LoanInstallmentDisplay, 0)
-		for _, installment := range loan.Installments {
-			loanDisplay.Installments = append(loanDisplay.Installments, LoanInstallmentDisplay{
-				ID:                installment.ID,
-				LoanID:            installment.LoanID,
-				PrincipalValue:    installment.PrincipalValue,
-				PrincipalValueStr: formatRupiahWithDecimals(installment.PrincipalValue),
-				InterestValue:     installment.InterestValue,
-				InterestValueStr:  formatRupiahWithDecimals(installment.InterestValue),
-				DueTimeUnix:       installment.DueTimeUnix,
-				CreateTimeUnix:    installment.CreateTimeUnix,
-				UpdateTimeUnix:    installment.UpdateTimeUnix,
-				Status:            installment.Status,
-			})
+		loanDisplay.Installments = PackInstallmentsDisplay(loan.Installments)
+	}
+	return
+}
+
+func PackInstallmentsDisplay(installments []*LoanInstallment) (installmentsDisplay []LoanInstallmentDisplay) {
+	installmentsDisplay = make([]LoanInstallmentDisplay, 0)
+	for _, installment := range installments {
+		if installment == nil {
+			continue
 		}
+		installmentsDisplay = append(installmentsDisplay, LoanInstallmentDisplay{
+			ID:                installment.ID,
+			LoanID:            installment.LoanID,
+			PrincipalValue:    installment.PrincipalValue,
+			PrincipalValueStr: formatRupiahWithDecimals(installment.PrincipalValue),
+			InterestValue:     installment.InterestValue,
+			InterestValueStr:  formatRupiahWithDecimals(installment.InterestValue),
+			DueTimeUnix:       installment.DueTimeUnix,
+			CreateTimeUnix:    installment.CreateTimeUnix,
+			UpdateTimeUnix:    installment.UpdateTimeUnix,
+			Status:            installment.Status,
+		})
 	}
 	return
 }
