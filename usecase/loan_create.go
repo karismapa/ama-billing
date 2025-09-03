@@ -61,6 +61,7 @@ func calculateInstallmentValues(loanPrincipalValue int64, loanAnnualRate int32, 
 }
 
 func getInstallmentDueTimeUnixes(startTime time.Time, loanNumOfInstallment int32) (dueTimeUnixes []int64) {
+	dueTimeUnixes = make([]int64, 0)
 	startTime = time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 0, 0, 0, 0, time.UTC)
 	for i := range loanNumOfInstallment {
 		dueTimeUnix := startTime.Add(time.Duration(i+1) * 7 * 24 * time.Hour).Unix()
